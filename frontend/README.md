@@ -40,16 +40,17 @@ frontend/
 
 ## 3. 环境变量
 
-在服务器的 `frontend/` 目录下创建 `.env`：
+默认走同源代理（开发用 vite dev server 代理 `/api` → `http://localhost:8000`，生产用 nginx 代理 `/api/` → `http://backend:8000/`），大多数情况下不需要显式配置 `VITE_API_BASE_URL`：
 
 ```env
-VITE_API_BASE_URL=http://你的服务器地址:8000
+VITE_API_BASE_URL=/api
 VITE_AMAP_JS_KEY=你的高德 JavaScript API key
 ```
 
 注意：
 
-- 如果浏览器是在你自己的电脑打开，`VITE_API_BASE_URL` 不要写服务器内部的 `127.0.0.1`
+- 默认值 `/api` 依赖反向代理；前端与后端不同源且不经过 nginx（例如前端单独托管、直连后端端口）时，才改为 `http://你的服务器地址:8000`
+- 如果浏览器是在你自己的电脑打开、后端在远程服务器上，直连时 `VITE_API_BASE_URL` 不要写服务器内部的 `127.0.0.1`
 - 高德前端地图需要 JavaScript API key，不是后端 Web 服务 key
 - 修改 `.env` 后需要重启 `npm run dev`
 

@@ -593,14 +593,17 @@ ENABLE_AMAP_ENRICHMENT=true             # 是否开启地图信息补全
 
 ### 前端 `frontend/.env`
 
+默认走同源代理（开发用 vite dev server 代理 `/api` → `http://localhost:8000`，生产用 nginx 代理 `/api/` → `http://backend:8000/`），大多数情况下不需要显式配置 `VITE_API_BASE_URL`：
+
 ```env
-VITE_API_BASE_URL=http://你的服务器地址:8000
+VITE_API_BASE_URL=/api
 VITE_AMAP_JS_KEY=your_amap_javascript_api_key
 ```
 
 注意：
 
-- 如果浏览器在本机打开，`VITE_API_BASE_URL` 不要写远程服务器内部的 `127.0.0.1`
+- 默认值 `/api` 依赖反向代理；如果前端与后端不同源且不经过 nginx（例如前端单独托管在 CDN、直连后端端口），才改为 `http://你的服务器地址:8000`
+- 如果浏览器在本机打开、后端在远程服务器上，直连时 `VITE_API_BASE_URL` 不要写服务器内部的 `127.0.0.1`
 - 后端高德 key 使用 Web 服务 key
 - 前端地图 key 使用 JavaScript API key
 - 修改 `.env` 后需要重启对应服务
