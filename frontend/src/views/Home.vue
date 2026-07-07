@@ -1,28 +1,30 @@
 <script setup lang="ts">
 import axios from "axios";
 import { computed, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { message } from "ant-design-vue";
 
 import { generateTrip } from "../services/api";
+import { setItinerary } from "../stores/itinerary";
 import type { Itinerary, TripRequestPayload } from "../types";
 
-const emit = defineEmits<{
-  generated: [itinerary: Itinerary];
-}>();
+const router = useRouter();
 
-const preferenceOptions = [
-  "自然风景",
-  "拍照",
-  "美食",
-  "古镇",
-  "休闲",
+const preferenceOptions = ["自然风景", "拍照", "美食", "古镇", "休闲"];
+const dietaryOptions = ["少辣", "不吃香菜", "不吃葱"];
+
+const quickDestinations = [
+  { label: "大理", icon: "🏔️" },
+  { label: "成都", icon: "🐼" },
+  { label: "杭州", icon: "🌊" },
+  { label: "西安", icon: "🏯" },
+  { label: "厦门", icon: "🌴" },
+  { label: "青岛", icon: "🍺" },
 ];
 
-const dietaryOptions = [
-  "少辣",
-  "不吃香菜",
-  "不吃葱",
-];
+function quickFill(dest: string) {
+  formState.destination = dest;
+}
 
 function formatDate(date: Date): string {
   const y = date.getFullYear();
@@ -35,18 +37,20 @@ const today = new Date();
 const todayPlus2 = new Date(today);
 todayPlus2.setDate(todayPlus2.getDate() + 2);
 
-const formState = reactive({
-  destination: "大理",
+const formDefaults = {
+  destination: "",
   startDate: formatDate(today),
   endDate: formatDate(todayPlus2),
   travelers: 2,
   budget: 3200,
   hotelLevel: "舒适型",
   pace: "轻松",
-  preferences: ["自然风景", "拍照", "美食"],
-  dietaryPreferences: ["少辣"],
-  notes: "不想太早起床，希望安排一个适合看日落的地点。",
-});
+  preferences: [] as string[],
+  dietaryPreferences: [] as string[],
+  notes: "",
+};
+
+const formState = reactive({ ...formDefaults });
 
 const isSubmitting = ref(false);
 
@@ -57,7 +61,16 @@ const dayCount = computed(() => {
   return Number.isNaN(diff) ? 0 : Math.max(Math.floor(diff / 86400000) + 1, 0);
 });
 
+function resetForm() {
+  Object.assign(formState, { ...formDefaults });
+}
+
 async function handleSubmit() {
+  if (!formState.destination.trim()) {
+    message.warning("请输入目的地城市。");
+    return;
+  }
+
   const payload: TripRequestPayload = {
     destination: formState.destination,
     start_date: formState.startDate,
@@ -74,8 +87,9 @@ async function handleSubmit() {
   isSubmitting.value = true;
   try {
     const itinerary = await generateTrip(payload);
-    message.success("行程生成成功，已切换到结果页。");
-    emit("generated", itinerary);
+    setItinerary(itinerary);
+    message.success("行程生成成功！");
+    router.push({ name: "result" });
   } catch (error) {
     console.error(error);
     if (axios.isAxiosError(error)) {
@@ -99,7 +113,6 @@ async function handleSubmit() {
   <section class="home-page">
     <div class="planner-card">
       <div class="section-title">
-        <span class="section-title__icon">📍</span>
         <span>目的地与日期</span>
       </div>
 
@@ -107,6 +120,17 @@ async function handleSubmit() {
         <a-col :xs="24" :md="8">
           <label class="field-label">目的地城市</label>
           <a-input v-model:value="formState.destination" placeholder="请输入目的地" />
+          <div class="quick-dest-row">
+            <button
+              v-for="d in quickDestinations"
+              :key="d.label"
+              :class="['quick-dest-btn', { 'quick-dest-btn--active': formState.destination === d.label }]"
+              type="button"
+              @click="quickFill(d.label)"
+            >
+              {{ d.icon }} {{ d.label }}
+            </button>
+          </div>
         </a-col>
         <a-col :xs="24" :md="5">
           <label class="field-label">开始日期</label>
@@ -128,10 +152,7 @@ async function handleSubmit() {
     </div>
 
     <div class="planner-card">
-      <div class="section-title">
-        <span class="section-title__icon">⚙️</span>
-        <span>偏好设置</span>
-      </div>
+      <div class="section-title">偏好设置</div>
 
       <a-row :gutter="[16, 16]">
         <a-col :xs="24" :md="8">
@@ -169,18 +190,12 @@ async function handleSubmit() {
 
       <div class="checkbox-area">
         <label class="field-label">饮食偏好</label>
-        <a-checkbox-group
-          v-model:value="formState.dietaryPreferences"
-          :options="dietaryOptions"
-        />
+        <a-checkbox-group v-model:value="formState.dietaryPreferences" :options="dietaryOptions" />
       </div>
     </div>
 
     <div class="planner-card">
-      <div class="section-title">
-        <span class="section-title__icon">💬</span>
-        <span>额外要求</span>
-      </div>
+      <div class="section-title">额外要求</div>
       <a-textarea
         v-model:value="formState.notes"
         :rows="4"
@@ -197,7 +212,7 @@ async function handleSubmit() {
         {{ isSubmitting ? "正在生成中..." : "开始规划" }}
       </button>
       <div class="submit-panel__status">
-        当前已接上 `/trip/generate`，生成成功后会直接展示真实 itinerary。
+        当前已接上 /trip/generate 接口
       </div>
     </div>
   </section>
@@ -229,16 +244,42 @@ async function handleSubmit() {
   font-weight: 700;
 }
 
-.section-title__icon {
-  font-size: 18px;
-}
-
 .field-label {
   display: block;
   margin-bottom: 8px;
   color: #667085;
   font-size: 13px;
   font-weight: 600;
+}
+
+.quick-dest-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.quick-dest-btn {
+  border: 1px solid rgba(109, 130, 222, 0.22);
+  border-radius: 999px;
+  padding: 5px 14px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #475467;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.quick-dest-btn:hover {
+  background: rgba(109, 130, 222, 0.1);
+  border-color: rgba(109, 130, 222, 0.45);
+}
+
+.quick-dest-btn--active {
+  background: linear-gradient(135deg, #7386e0 0%, #8f71d8 100%);
+  color: #ffffff;
+  border-color: transparent;
 }
 
 .pill-box {

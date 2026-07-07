@@ -1,28 +1,7 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { useRouter } from "vue-router";
 
-import type { Itinerary } from "./types";
-import History from "./views/History.vue";
-import Home from "./views/Home.vue";
-import Result from "./views/Result.vue";
-
-const currentView = ref<"home" | "result" | "history">("home");
-const latestItinerary = ref<Itinerary | null>(null);
-
-function handleGenerated(itinerary: Itinerary) {
-  latestItinerary.value = itinerary;
-  currentView.value = "result";
-}
-
-function openTrip(itinerary: Itinerary) {
-  latestItinerary.value = itinerary;
-  currentView.value = "result";
-}
-
-function updateCurrentItinerary(itinerary: Itinerary) {
-  latestItinerary.value = itinerary;
-  currentView.value = "result";
-}
+const router = useRouter();
 </script>
 
 <template>
@@ -34,50 +13,30 @@ function updateCurrentItinerary(itinerary: Itinerary) {
       <div class="hero__badge">Trip Planner Demo</div>
       <h1 class="hero__title">智能旅行助手</h1>
 
-      <div class="hero__tabs">
+      <nav class="hero__tabs">
         <button
-          :class="['hero__tab', { 'hero__tab--active': currentView === 'home' }]"
-          @click="currentView = 'home'"
+          :class="['hero__tab', { 'hero__tab--active': router.currentRoute.value.name === 'home' }]"
+          @click="router.push({ name: 'home' })"
         >
           规划页
         </button>
         <button
-          :class="[
-            'hero__tab',
-            { 'hero__tab--active': currentView === 'result' },
-            { 'hero__tab--disabled': !latestItinerary }
-          ]"
-          :disabled="!latestItinerary"
-          @click="currentView = 'result'"
+          :class="['hero__tab', { 'hero__tab--active': router.currentRoute.value.name === 'result' }]"
+          @click="router.push({ name: 'result' })"
         >
           结果页
         </button>
         <button
-          :class="['hero__tab', { 'hero__tab--active': currentView === 'history' }]"
-          @click="currentView = 'history'"
+          :class="['hero__tab', { 'hero__tab--active': router.currentRoute.value.name === 'history' }]"
+          @click="router.push({ name: 'history' })"
         >
           历史列表
         </button>
-      </div>
+      </nav>
     </header>
 
     <main class="page-content">
-      <Home
-        v-if="currentView === 'home'"
-        @generated="handleGenerated"
-      />
-      <Result
-        v-else-if="currentView === 'result'"
-        :itinerary="latestItinerary"
-        @back-home="currentView = 'home'"
-        @view-history="currentView = 'history'"
-        @updated="updateCurrentItinerary"
-      />
-      <History
-        v-else
-        :active="currentView === 'history'"
-        @open-trip="openTrip"
-      />
+      <router-view />
     </main>
   </div>
 </template>
@@ -190,11 +149,6 @@ function updateCurrentItinerary(itinerary: Itinerary) {
 .hero__tab--active {
   background: rgba(255, 255, 255, 0.92);
   color: #5f60c8;
-}
-
-.hero__tab--disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .page-content {
