@@ -98,8 +98,8 @@ def test_edit_trip_itinerary_updates_target_day_theme(monkeypatch) -> None:
 
 
 def test_edit_trip_itinerary_can_replace_first_spot_with_free_time(monkeypatch) -> None:
-    “””测试”不要安排”指令会把景点调整成自由活动。”””
-    monkeypatch.setattr(trip_service, “generate_day_edit_draft”, lambda request, target_day: (None, {“prompt_tokens”: 0, “completion_tokens”: 0}))
+    """测试"不要安排"指令会把景点调整成自由活动。"""
+    monkeypatch.setattr(trip_service, "generate_day_edit_draft", lambda request, target_day: (None, {"prompt_tokens": 0, "completion_tokens": 0}))
     original_itinerary = generate_trip_itinerary(build_trip_request())
 
     edit_request = TripEditRequest(

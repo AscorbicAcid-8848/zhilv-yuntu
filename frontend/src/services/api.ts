@@ -43,12 +43,12 @@ export async function listTrips(): Promise<TripListResponse> {
 }
 
 export async function getTripDetail(tripId: string): Promise<TripDetailResponse> {
-  const response = await api.get<TripDetailResponse>(`/trip/${tripId}`);
+  const response = await api.get<TripDetailResponse>(`/trip/${encodeURIComponent(tripId)}`);
   return response.data;
 }
 
 export async function deleteTrip(tripId: string): Promise<void> {
-  await api.delete(`/trip/${tripId}`);
+  await api.delete(`/trip/${encodeURIComponent(tripId)}`);
 }
 
 export async function fetchWeatherForecast(city: string): Promise<WeatherForecastResponse> {

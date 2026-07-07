@@ -80,6 +80,17 @@ export interface BudgetBreakdown {
   total: number;
 }
 
+export interface TokenUsage {
+  rewrite_prompt_tokens?: number;
+  rewrite_completion_tokens?: number;
+  embedding_prompt_tokens?: number;
+  embedding_completion_tokens?: number;
+  planner_prompt_tokens?: number;
+  planner_completion_tokens?: number;
+  rerank_prompt_tokens?: number;
+  rerank_completion_tokens?: number;
+}
+
 export interface Itinerary {
   trip_id: string;
   destination: string;
@@ -89,6 +100,7 @@ export interface Itinerary {
   budget_breakdown: BudgetBreakdown;
   tips: string[];
   source_notes: string[];
+  token_usage?: TokenUsage | null;
 }
 
 export interface TripSaveResponse {

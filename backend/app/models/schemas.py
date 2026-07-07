@@ -211,3 +211,9 @@ class TokenStatsResponse(BaseModel):
     total_completion_tokens: int = Field(default=0, ge=0, description="总输出 token")
     total_tokens: int = Field(default=0, ge=0, description="总 token")
     items: list[TripTokenStatsItem] = Field(default_factory=list, description="各行程 token 明细")
+
+
+# TripEditRequest/TripSaveRequest 前向引用 "Itinerary"，在 Itinerary 定义完成后显式重建，
+# 避免某些校验/序列化路径报 Itinerary is not fully defined。
+TripEditRequest.model_rebuild()
+TripSaveRequest.model_rebuild()
