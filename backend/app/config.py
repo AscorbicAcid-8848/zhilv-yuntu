@@ -63,3 +63,11 @@ AMAP_BASE_URL = os.getenv("AMAP_BASE_URL", "https://restapi.amap.com/v3")
 AMAP_DEFAULT_CITY = os.getenv("AMAP_DEFAULT_CITY", "")
 AMAP_TIMEOUT_SECONDS = int(os.getenv("AMAP_TIMEOUT_SECONDS", "20"))
 ENABLE_AMAP_ENRICHMENT = os.getenv("ENABLE_AMAP_ENRICHMENT", "false").lower() == "true"
+
+
+_cors_origins_raw = os.getenv(
+    "CORS_ALLOWED_ORIGINS",
+    "http://localhost,http://localhost:80,http://localhost:5173,http://127.0.0.1:5173,"
+    "http://localhost:4173,http://127.0.0.1:4173,http://localhost:8000,http://127.0.0.1:8000",
+)
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in _cors_origins_raw.split(",") if origin.strip()]

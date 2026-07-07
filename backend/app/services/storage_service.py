@@ -22,8 +22,6 @@ def init_db() -> None:
 
 def save_itinerary(itinerary: Itinerary) -> str:
     """保存或更新完整 itinerary，并返回 trip_id。"""
-    init_db()
-
     session = SessionLocal()
     try:
         itinerary_json = json.dumps(
@@ -58,8 +56,6 @@ def save_itinerary(itinerary: Itinerary) -> str:
 
 def get_itinerary_by_trip_id(trip_id: str) -> TripDetailResponse | None:
     """根据 trip_id 读取已保存 itinerary，找不到时返回 None。"""
-    init_db()
-
     session = SessionLocal()
     try:
         record = session.query(TripRecord).filter(TripRecord.trip_id == trip_id).first()
@@ -81,8 +77,6 @@ def get_itinerary_by_trip_id(trip_id: str) -> TripDetailResponse | None:
 
 def list_saved_itineraries() -> TripListResponse:
     """返回已保存行程的摘要列表。"""
-    init_db()
-
     session = SessionLocal()
     try:
         records = (
@@ -108,8 +102,6 @@ def list_saved_itineraries() -> TripListResponse:
 
 def get_token_stats() -> TokenStatsResponse:
     """统计所有已保存行程的 token 消耗。"""
-    init_db()
-
     session = SessionLocal()
     try:
         records = (
@@ -152,8 +144,6 @@ def get_token_stats() -> TokenStatsResponse:
 
 def delete_itinerary_by_trip_id(trip_id: str) -> bool:
     """根据 trip_id 删除已保存行程，删除成功返回 True。"""
-    init_db()
-
     session = SessionLocal()
     try:
         record = session.query(TripRecord).filter(TripRecord.trip_id == trip_id).first()
