@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import date as DateType, timedelta
 
 from app.agents.trip_planner_agent import (
@@ -21,6 +22,9 @@ from app.models.schemas import (
     TripRequest,
 )
 from app.services.map_service import enrich_itinerary_with_map_data
+
+
+logger = logging.getLogger(__name__)
 
 
 TECHNICAL_TIP_KEYWORDS = (
@@ -228,8 +232,8 @@ def _maybe_enrich_itinerary_with_map_data(
     if ENABLE_AMAP_ENRICHMENT:
         try:
             itinerary = enrich_itinerary_with_map_data(itinerary, city=city)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning("地图数据补充失败: %s", exc)
 
     return _refresh_budget_breakdown(itinerary, request_budget=request_budget)
 

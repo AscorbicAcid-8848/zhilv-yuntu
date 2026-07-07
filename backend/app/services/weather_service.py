@@ -3,16 +3,14 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import httpx
-
 from app.config import (
     AMAP_API_KEY,
     AMAP_BASE_URL,
-    AMAP_TIMEOUT_SECONDS,
     REDIS_WEATHER_TTL_SECONDS,
 )
 from app.services.cache_service import get_cached_json, set_cached_json
 from app.services.map_service import geocode_address
+from app.shared.http_client import get_http_client
 
 
 logger = logging.getLogger(__name__)
@@ -24,11 +22,6 @@ def _ensure_amap_api_key() -> None:
         raise RuntimeError("当前环境未配置 AMAP_API_KEY，无法调用天气服务。")
 
 
-def _build_client() -> httpx.Client:
-    """创建访问高德天气 API 的客户端。"""
-    return httpx.Client(timeout=AMAP_TIMEOUT_SECONDS)
-
-
 def _request_amap_weather(path: str, params: dict[str, Any]) -> dict[str, Any]:
     """调用高德天气接口并返回 JSON 结果。"""
     _ensure_amap_api_key()
@@ -38,10 +31,10 @@ def _request_amap_weather(path: str, params: dict[str, Any]) -> dict[str, Any]:
         **params,
     }
 
-    with _build_client() as client:
-        response = client.get(f"{AMAP_BASE_URL}{path}", params=request_params)
-        response.raise_for_status()
-        payload = response.json()
+    client = get_http_client()
+    response = client.get(f"{AMAP_BASE_URL}{path}", params=request_params)
+    response.raise_for_status()
+    payload = response.json()
 
     if payload.get("status") != "1":
         info = payload.get("info", "未知错误")
