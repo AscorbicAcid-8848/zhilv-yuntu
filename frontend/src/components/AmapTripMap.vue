@@ -1,19 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
-
-interface TripMapPoint {
-  key: string;
-  dayIndex: number;
-  date: string;
-  theme: string;
-  name: string;
-  address: string;
-  latitude: number | null | undefined;
-  longitude: number | null | undefined;
-  poiId: string | null | undefined;
-  imageUrl?: string | null;
-  description: string;
-}
+import type { TripMapPoint } from "../types/map";
 
 const props = defineProps<{
   points: TripMapPoint[];

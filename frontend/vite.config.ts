@@ -8,16 +8,16 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://localhost:8000",
+        target: "http://10.103.238.248:8000",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
       "/weather": {
-        target: "http://localhost:8000",
+        target: "http://10.103.238.248:8000",
         changeOrigin: true,
       },
       "/export": {
-        target: "http://localhost:8000",
+        target: "http://10.103.238.248:8000",
         changeOrigin: true,
       },
     },
